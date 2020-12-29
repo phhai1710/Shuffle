@@ -72,6 +72,7 @@ class TinderViewController: UIViewController {
     layoutButtonStackView()
     layoutCardStackView()
     configureBackgroundGradient()
+    configureCardUnderlayView()
   }
 
   private func configureNavigationBar() {
@@ -118,6 +119,11 @@ class TinderViewController: UIViewController {
                      left: view.safeAreaLayoutGuide.leftAnchor,
                      bottom: buttonStackView.topAnchor,
                      right: view.safeAreaLayoutGuide.rightAnchor)
+  }
+  
+  private func configureCardUnderlayView() {
+    cardStack.setCardUnderlay(TinderCardOverlay(direction: .left), forDirection: .left)
+    cardStack.setCardUnderlay(TinderCardOverlay(direction: .right), forDirection: .right)
   }
 
   @objc

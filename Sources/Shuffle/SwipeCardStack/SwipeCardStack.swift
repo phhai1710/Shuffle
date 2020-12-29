@@ -77,7 +77,10 @@ open class SwipeCardStack: UIView, SwipeCardDelegate, UIGestureRecognizerDelegat
   var backgroundCards: [SwipeCard] {
     return Array(visibleCards.dropFirst()).map { $0.card }
   }
-
+  private let underlayContainer = UIView()
+  
+  private var cardUnderlays = [SwipeDirection: UIView]()
+  
   var isEnabled: Bool {
     return !isAnimating && (topCard?.isUserInteractionEnabled ?? true)
   }
@@ -123,6 +126,7 @@ open class SwipeCardStack: UIView, SwipeCardDelegate, UIGestureRecognizerDelegat
                                    selector: #selector(didFinishSwipeAnimation),
                                    name: CardDidFinishSwipeAnimationNotification,
                                    object: nil)
+    addSubview(underlayContainer)
   }
 
   // MARK: - Layout
@@ -130,6 +134,8 @@ open class SwipeCardStack: UIView, SwipeCardDelegate, UIGestureRecognizerDelegat
   override open func layoutSubviews() {
     super.layoutSubviews()
     cardContainer.frame = layoutProvider.createCardContainerFrame(for: self)
+    underlayContainer.frame = cardContainer.frame
+    cardUnderlays.values.forEach { $0.frame = underlayContainer.bounds }
     for (position, value) in visibleCards.enumerated() {
       layoutCard(value.card, at: position)
     }
@@ -271,7 +277,27 @@ open class SwipeCardStack: UIView, SwipeCardDelegate, UIGestureRecognizerDelegat
                             }
     }
   }
-
+  public func setCardUnderlay(_ cardUnderlay: UIView?, forDirection direction: SwipeDirection) {
+    cardUnderlays[direction]?.removeFromSuperview()
+    cardUnderlays[direction] = cardUnderlay
+    
+    if let cardUnderlay = cardUnderlay {
+      underlayContainer.addSubview(cardUnderlay)
+      cardUnderlay.alpha = 0
+      cardUnderlay.setUserInteraction(false)
+    }
+  }
+  
+  public func setCardUnderlays(_ cardUnderlays: [SwipeDirection: UIView]) {
+    for (direction, cardUnderlay) in cardUnderlays {
+      setCardUnderlay(cardUnderlay, forDirection: direction)
+    }
+  }
+  
+  public func underlay(forDirection direction: SwipeDirection) -> UIView? {
+    return cardUnderlays[direction]
+  }
+  
   // MARK: - Data Source
 
   public func reloadData() {
@@ -308,6 +334,9 @@ open class SwipeCardStack: UIView, SwipeCardDelegate, UIGestureRecognizerDelegat
 
   func insertCard(_ value: Card, at position: Int) {
     cardContainer.insertSubview(value.card, at: visibleCards.count - position)
+    // Insert underlay container below the top card
+    cardContainer.insertSubview((underlayContainer), at: visibleCards.count)
+
     layoutCard(value.card, at: position)
     visibleCards.insert(value, at: position)
   }
@@ -459,14 +488,32 @@ open class SwipeCardStack: UIView, SwipeCardDelegate, UIGestureRecognizerDelegat
                                                                                topCard: card,
                                                                                currentPosition: position + 1)
     }
+    for (direction, cardUnderlay) in cardUnderlays {
+      cardUnderlay.alpha = underlayPercentage(for: card, direction: direction)
+    }
   }
-
+  
+  func underlayPercentage(for card: SwipeCard, direction: SwipeDirection) -> CGFloat {
+    if direction != card.activeDirection() { return 0 }
+    let totalPercentage = card.swipeDirections.reduce(0) { sum, direction in
+      return sum + card.dragPercentage(on: direction)
+    }
+    let actualPercentage = 2 * card.dragPercentage(on: direction) - totalPercentage
+    return max(0, min(actualPercentage, 1))
+  }
+  
   func card(didCancelSwipe card: SwipeCard) {
     animator.animateReset(self, topCard: card)
+    for cardUnderlay in cardUnderlays.values {
+      cardUnderlay.alpha = 0
+    }
   }
 
   func card(didSwipe card: SwipeCard,
             with direction: SwipeDirection) {
     swipeAction(topCard: card, direction: direction, forced: false, animated: true)
+    for cardUnderlay in cardUnderlays.values {
+      cardUnderlay.alpha = 0
+    }
   }
 }
