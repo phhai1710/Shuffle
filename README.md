@@ -4,7 +4,7 @@
 
 ## What is the difference from original Shuffle?
 
-💡 Open numberOfVisibleCards to decide how many cards will be show in the same time. 
+💡 Open numberOfVisibleCards to decide how many cards will be shown in the same time. 
 
 💡 Implement underlay view 
 
@@ -20,7 +20,7 @@ To run the example project, clone the repo and run the `ShuffleExample` target.
 
 The following methods are available on `SwipeCardStack`.
 
-### numberOfVisibleCards
+### 1. numberOfVisibleCards
 
 Change the number of visible cards (Default is 2):
 
@@ -42,7 +42,7 @@ cardStack.numberOfVisibleCards = 1
 
 
 
-### Underlays
+### 2. Underlays
 
 An underlay is a view whose alpha value reacts to the user's dragging. The underlay are laid out below the top visible card. 
 
@@ -51,6 +51,10 @@ func underlay(forDirection direction: SwipeDirection) -> UIView?
 func setCardUnderlay(_ cardUnderlay: UIView?, forDirection direction: SwipeDirection)
 func setCardUnderlays(_ cardUnderlays: [SwipeDirection: UIView])
 ```
+
+<p align="left">
+<img src="https://raw.githubusercontent.com/phhai1710/Shuffle/master/Assets/numberOfVisibleCards.gif" width="280">
+</p>
 
 ## Installation
 
