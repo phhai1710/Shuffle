@@ -53,7 +53,7 @@ func setCardUnderlays(_ cardUnderlays: [SwipeDirection: UIView])
 ```
 
 <p align="left">
-<img src="https://raw.githubusercontent.com/phhai1710/Shuffle/master/Assets/numberOfVisibleCards.gif" width="280">
+<img src="https://raw.githubusercontent.com/phhai1710/Shuffle/master/Assets/underlayView.gif" width="280">
 </p>
 
 ## Installation
